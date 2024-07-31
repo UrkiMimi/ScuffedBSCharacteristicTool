@@ -5,7 +5,7 @@ import os
 from time import sleep
 from colorama import Fore, Back, Style
 
-version = 'v0.1.0'
+version = 'v0.1.1'
 
 ### functions
 
@@ -28,22 +28,38 @@ def injectCustomData(listIndex, Title, Image):
     if not(Image == 'None'):
         inDat['_difficultyBeatmapSets'][listIndex]['_customData']['_characteristicIconImageFilename'] = Image
 
+#Disgusting thing
+def convYesNoToBool(input):
+    if input == 'yes':
+        return True
+    elif input == 'no':
+        return False
+    else:
+        return 'input not valid'
 
 ### Main Program starts here
 
-# Load info.dat
+
 try:
+    # setup stuff
+    clearScreen()
+    dir = input(f'{Fore.BLUE}Drag the unzipped Beat Saber Map into this terminal window then press enter: \n \n{Style.RESET_ALL}')
+    dir.replace("'","")
+    os.chdir(dir.replace('"',''))
+
+    # Load info.dat
     infoDatRaw = open('Info.dat', 'r')
     inDat = json.loads(infoDatRaw.read())
     print('Loaded Info.dat')
-    infoDatRaw.close()
+    sleep(0.1)
+    infoDatRaw.close() #Closes raw info.dat file
 
     # Clears screen and prints title
     clearScreen()
-    print(f'{Fore.BLUE}Scuffed {Fore.RED}B{Fore.BLUE}S Characteristic Editor ' + version + f'\n {Style.RESET_ALL}')
+    print(f'{Fore.BLUE}Scuffed {Fore.RED}Beat {Fore.BLUE}Saber Characteristic Editor ' + version + f'\n {Style.RESET_ALL}')
 
-    selc = ''
     # selection while loop
+    selc = ''
     while not(selc.isnumeric() and (int(selc) >= 1) and (int(selc) <= len(inDat['_difficultyBeatmapSets']))):  
         printCharacteristics()
         selc = input('Select Characteristic: ')
@@ -51,21 +67,22 @@ try:
         if not(selc.isnumeric()):
             print(f'{Fore.RED}\nYou must type a number{Style.RESET_ALL}')
         elif not((int(selc) >= 1) and (int(selc) <= len(inDat['_difficultyBeatmapSets']))):
-            print(f'{Fore.RED}\nInput out of range{Style.RESET_ALL}')
+            print(f'{Fore.RED}\nSelection not valid{Style.RESET_ALL}')
     selc = int(selc) - 1
 
     # custom name
     clearScreen()
     ti = input('Please type out a characteristic title:\n')
-    if_else = ''
+    if_else = 0
 
     # custom image
-    while not((if_else == 'yes') or (if_else == 'no')):
-        if_else = input('Do you want to add an image? ')
-        if not((if_else == 'yes') or (if_else == 'no')):
+    # What the fuck is with my coding kills
+    while not(type(if_else)==bool):
+        if_else = convYesNoToBool(input('Do you want to add an image? '))
+        if not(type(if_else)==bool):
             print(f'{Fore.RED}Enter yes or no{Style.RESET_ALL}')
-    if (if_else == 'yes'):
-        im = input('Type out image name:\n')
+    if if_else:
+        im = input('Type out the image filename:\n')
     else:
         im = 'None'
 
@@ -74,8 +91,10 @@ try:
     infoDatRaw = open('Info.dat', 'w')
     infoDatRaw.write(json.dumps(inDat, indent=2))
     infoDatRaw.close()
+
+    # Print out injection status
     print(f'{Fore.GREEN}\nCustomData injected into characteristic{Style.RESET_ALL}')
     input('Press Enter to continue')
 except:
-    print(f'{Fore.RED}Oops you broke it. You probably forgot to run this in a folder with info.dat\nIf not, then make a GitHub issue or contact me on Discord [dwmdotexe].\n{Style.RESET_ALL}')
+    print(f'{Fore.RED}Oops you broke it.\nPlease submit an issue to GitHub or contact me on Discord [dwmdotexe].\n{Style.RESET_ALL}')
     input('Press Enter to continue')
